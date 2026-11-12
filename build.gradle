@@ -37,6 +37,9 @@ tasks.withType(JavaCompile).configureEach {
 
 sourceSets {
     main {
-        java { srcDirs = ['src/main/java'] }
+        java {
+            srcDirs = ['src/main/java']
+            exclude '**/triggerbot/**/src/**'
+        }
     }
 }

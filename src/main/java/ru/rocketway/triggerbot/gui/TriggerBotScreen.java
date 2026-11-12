@@ -15,9 +15,9 @@ public class TriggerBotScreen extends Screen {
     @Override
     protected void init() {
         int cx = this.width / 2;
-        int y = this.height / 2 - 60;
+        int y = this.height / 2 - 85; // Сдвинули чуть выше
 
-        // Кнопка Вкл/Выкл
+        // Вкл/Выкл Триггербота
         this.addDrawableChild(ButtonWidget.builder(
                 Text.literal("TriggerBot: " + (RocketTriggerBot.ENABLED ? "§aON" : "§cOFF")),
                 b -> {
@@ -26,15 +26,31 @@ public class TriggerBotScreen extends Screen {
                 }
         ).dimensions(cx - 100, y, 200, 20).build());
 
-        // Задержка
-        this.addDrawableChild(new SliderWidget(cx - 100, y + 25, 200, 20,
+        // Вкл/Выкл Aim Assist
+        this.addDrawableChild(ButtonWidget.builder(
+                Text.literal("Aim Assist: " + (RocketTriggerBot.AIM_ASSIST ? "§aON" : "§cOFF")),
+                b -> {
+                    RocketTriggerBot.AIM_ASSIST = !RocketTriggerBot.AIM_ASSIST;
+                    b.setMessage(Text.literal("Aim Assist: " + (RocketTriggerBot.AIM_ASSIST ? "§aON" : "§cOFF")));
+                }
+        ).dimensions(cx - 100, y + 25, 200, 20).build());
+
+        // Задержка удара
+        this.addDrawableChild(new SliderWidget(cx - 100, y + 50, 200, 20,
                 Text.literal("Delay: " + RocketTriggerBot.DELAY_MS + "ms"), (RocketTriggerBot.DELAY_MS - 50) / 450.0) {
             @Override protected void updateMessage() { setMessage(Text.literal("Delay: " + (int)(50 + value * 450) + "ms")); }
             @Override protected void applyValue() { RocketTriggerBot.DELAY_MS = (int)(50 + value * 450); }
         });
 
+        // Сила наведения (Aim Speed)
+        this.addDrawableChild(new SliderWidget(cx - 100, y + 75, 200, 20,
+                Text.literal("Aim Speed: " + String.format("%.1f", RocketTriggerBot.AIM_SPEED)), (RocketTriggerBot.AIM_SPEED - 0.1) / 9.9) {
+            @Override protected void updateMessage() { setMessage(Text.literal("Aim Speed: " + String.format("%.1f", 0.1 + value * 9.9))); }
+            @Override protected void applyValue() { RocketTriggerBot.AIM_SPEED = 0.1 + value * 9.9; }
+        });
+
         // Радиус
-        this.addDrawableChild(new SliderWidget(cx - 100, y + 50, 200, 20,
+        this.addDrawableChild(new SliderWidget(cx - 100, y + 100, 200, 20,
                 Text.literal("Range: " + RocketTriggerBot.RANGE + "m"), (RocketTriggerBot.RANGE - 1) / 9) {
             @Override protected void updateMessage() { setMessage(Text.literal("Range: " + String.format("%.1f", 1 + value * 9) + "m")); }
             @Override protected void applyValue() { RocketTriggerBot.RANGE = 1 + value * 9; }
@@ -47,32 +63,26 @@ public class TriggerBotScreen extends Screen {
                     RocketTriggerBot.IGNORE_MOBS = !RocketTriggerBot.IGNORE_MOBS;
                     b.setMessage(Text.literal("Ignore mobs: " + (RocketTriggerBot.IGNORE_MOBS ? "§aYES" : "§cNO")));
                 }
-        ).dimensions(cx - 100, y + 75, 200, 20).build());
+        ).dimensions(cx - 100, y + 125, 200, 20).build());
 
-        // Рандомная задержка
+        // Рандом задержки
         this.addDrawableChild(ButtonWidget.builder(
-                Text.literal("Randomize Delay: " + (RocketTriggerBot.RANDOM_DELAY ? "§aON" : "§cOFF")),
+                Text.literal("Random Delay: " + (RocketTriggerBot.RANDOM_DELAY ? "§aON" : "§cOFF")),
                 b -> {
                     RocketTriggerBot.RANDOM_DELAY = !RocketTriggerBot.RANDOM_DELAY;
-                    b.setMessage(Text.literal("Randomize Delay: " + (RocketTriggerBot.RANDOM_DELAY ? "§aON" : "§cOFF")));
+                    b.setMessage(Text.literal("Random Delay: " + (RocketTriggerBot.RANDOM_DELAY ? "§aON" : "§cOFF")));
                 }
-        ).dimensions(cx - 100, y + 100, 200, 20).build());
+        ).dimensions(cx - 100, y + 150, 200, 20).build());
 
         // Кнопка закрытия
-        this.addDrawableChild(ButtonWidget.builder(Text.literal("§cClose Menu"), b -> this.close()).dimensions(cx - 100, y + 130, 200, 20).build());
+        this.addDrawableChild(ButtonWidget.builder(Text.literal("§cClose Menu"), b -> this.close()).dimensions(cx - 100, y + 180, 200, 20).build());
     }
 
     @Override
     public void render(DrawContext ctx, int mouseX, int mouseY, float delta) {
-        // Отрисовка темного прозрачного фона на весь экран
         ctx.fill(0, 0, this.width, this.height, 0x99000000); 
-
-        // Рисуем большой заголовок "Dark Trigger"
-        ctx.drawCenteredTextWithShadow(this.textRenderer, "§l§cDARK TRIGGER", this.width / 2, this.height / 2 - 100, 0xFFFFFF);
-        
-        // Рисуем маленький текст-подсказку
-        ctx.drawCenteredTextWithShadow(this.textRenderer, "§7Premium TriggerBot", this.width / 2, this.height / 2 - 85, 0xAAAAAA);
-
+        ctx.drawCenteredTextWithShadow(this.textRenderer, "§l§cDARK TRIGGER", this.width / 2, this.height / 2 - 125, 0xFFFFFF);
+        ctx.drawCenteredTextWithShadow(this.textRenderer, "§7Premium TriggerBot", this.width / 2, this.height / 2 - 110, 0xAAAAAA);
         super.render(ctx, mouseX, mouseY, delta);
     }
 

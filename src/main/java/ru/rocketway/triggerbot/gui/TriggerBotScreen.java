@@ -13,7 +13,7 @@ public class TriggerBotScreen extends Screen {
     @Override
     protected void init() {
         int cx = this.width / 2;
-        int y = this.height / 2 - 60;
+        int y = this.height / 2 - 90; // Сдвинули вверх, чтобы всё влезло
 
         this.addDrawableChild(ButtonWidget.builder(
                 Text.literal("TriggerBot: " + (RocketTriggerBot.ENABLED ? "ON" : "OFF")),
@@ -24,15 +24,15 @@ public class TriggerBotScreen extends Screen {
         ).dimensions(cx - 100, y, 200, 20).build());
 
         this.addDrawableChild(new SliderWidget(cx - 100, y + 25, 200, 20,
-                Text.literal("Range: " + RocketTriggerBot.RANGE + "m"), (RocketTriggerBot.RANGE - 1) / 9) {
-            @Override protected void updateMessage() { setMessage(Text.literal("Range: " + String.format("%.1f", 1 + value * 9) + "m")); }
-            @Override protected void applyValue() { RocketTriggerBot.RANGE = 1 + value * 9; }
+                Text.literal("Base Delay: " + RocketTriggerBot.DELAY_MS + "ms"), (RocketTriggerBot.DELAY_MS - 50) / 450.0) {
+            @Override protected void updateMessage() { setMessage(Text.literal("Base Delay: " + (int)(50 + value * 450) + "ms")); }
+            @Override protected void applyValue() { RocketTriggerBot.DELAY_MS = (int)(50 + value * 450); }
         });
 
         this.addDrawableChild(new SliderWidget(cx - 100, y + 50, 200, 20,
-                Text.literal("Delay: " + RocketTriggerBot.DELAY_MS + "ms"), (RocketTriggerBot.DELAY_MS - 50) / 450.0) {
-            @Override protected void updateMessage() { setMessage(Text.literal("Delay: " + (int)(50 + value * 450) + "ms")); }
-            @Override protected void applyValue() { RocketTriggerBot.DELAY_MS = (int)(50 + value * 450); }
+                Text.literal("Range: " + RocketTriggerBot.RANGE + "m"), (RocketTriggerBot.RANGE - 1) / 9) {
+            @Override protected void updateMessage() { setMessage(Text.literal("Range: " + String.format("%.1f", 1 + value * 9) + "m")); }
+            @Override protected void applyValue() { RocketTriggerBot.RANGE = 1 + value * 9; }
         });
 
         this.addDrawableChild(ButtonWidget.builder(
@@ -43,7 +43,24 @@ public class TriggerBotScreen extends Screen {
                 }
         ).dimensions(cx - 100, y + 75, 200, 20).build());
 
-        this.addDrawableChild(ButtonWidget.builder(Text.literal("Close"), b -> this.close()).dimensions(cx - 100, y + 105, 200, 20).build());
+        this.addDrawableChild(ButtonWidget.builder(
+                Text.literal("Smart Crits: " + (RocketTriggerBot.SMART_CRITS ? "ON" : "OFF")),
+                b -> {
+                    RocketTriggerBot.SMART_CRITS = !RocketTriggerBot.SMART_CRITS;
+                    b.setMessage(Text.literal("Smart Crits: " + (RocketTriggerBot.SMART_CRITS ? "ON" : "OFF")));
+                }
+        ).dimensions(cx - 100, y + 100, 200, 20).build());
+
+        // НОВАЯ КНОПКА РАНДОМА
+        this.addDrawableChild(ButtonWidget.builder(
+                Text.literal("Randomize Delay: " + (RocketTriggerBot.RANDOM_DELAY ? "ON" : "OFF")),
+                b -> {
+                    RocketTriggerBot.RANDOM_DELAY = !RocketTriggerBot.RANDOM_DELAY;
+                    b.setMessage(Text.literal("Randomize Delay: " + (RocketTriggerBot.RANDOM_DELAY ? "ON" : "OFF")));
+                }
+        ).dimensions(cx - 100, y + 125, 200, 20).build());
+
+        this.addDrawableChild(ButtonWidget.builder(Text.literal("Close"), b -> this.close()).dimensions(cx - 100, y + 155, 200, 20).build());
     }
 
     @Override

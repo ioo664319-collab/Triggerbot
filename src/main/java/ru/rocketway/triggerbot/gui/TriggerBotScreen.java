@@ -13,7 +13,7 @@ public class TriggerBotScreen extends Screen {
     @Override
     protected void init() {
         int cx = this.width / 2;
-        int y = this.height / 2 - 90; // Сдвинули вверх, чтобы всё влезло
+        int y = this.height / 2 - 60;
 
         this.addDrawableChild(ButtonWidget.builder(
                 Text.literal("TriggerBot: " + (RocketTriggerBot.ENABLED ? "ON" : "OFF")),
@@ -44,23 +44,14 @@ public class TriggerBotScreen extends Screen {
         ).dimensions(cx - 100, y + 75, 200, 20).build());
 
         this.addDrawableChild(ButtonWidget.builder(
-                Text.literal("Smart Crits: " + (RocketTriggerBot.SMART_CRITS ? "ON" : "OFF")),
-                b -> {
-                    RocketTriggerBot.SMART_CRITS = !RocketTriggerBot.SMART_CRITS;
-                    b.setMessage(Text.literal("Smart Crits: " + (RocketTriggerBot.SMART_CRITS ? "ON" : "OFF")));
-                }
-        ).dimensions(cx - 100, y + 100, 200, 20).build());
-
-        // НОВАЯ КНОПКА РАНДОМА
-        this.addDrawableChild(ButtonWidget.builder(
                 Text.literal("Randomize Delay: " + (RocketTriggerBot.RANDOM_DELAY ? "ON" : "OFF")),
                 b -> {
                     RocketTriggerBot.RANDOM_DELAY = !RocketTriggerBot.RANDOM_DELAY;
                     b.setMessage(Text.literal("Randomize Delay: " + (RocketTriggerBot.RANDOM_DELAY ? "ON" : "OFF")));
                 }
-        ).dimensions(cx - 100, y + 125, 200, 20).build());
+        ).dimensions(cx - 100, y + 100, 200, 20).build());
 
-        this.addDrawableChild(ButtonWidget.builder(Text.literal("Close"), b -> this.close()).dimensions(cx - 100, y + 155, 200, 20).build());
+        this.addDrawableChild(ButtonWidget.builder(Text.literal("Close"), b -> this.close()).dimensions(cx - 100, y + 130, 200, 20).build());
     }
 
     @Override

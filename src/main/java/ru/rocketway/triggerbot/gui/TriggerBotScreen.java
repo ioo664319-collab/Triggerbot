@@ -35,7 +35,7 @@ public class TriggerBotScreen extends Screen {
                 }
         ).dimensions(cx - 105, y + 22, 210, 18).build());
 
-        // 3. CPS Ползунок (от 1 до 15 CPS)
+        // 3. CPS
         this.addDrawableChild(new SliderWidget(cx - 105, y + 44, 210, 18,
                 Text.literal("§7CPS: §f" + String.format("%.1f", RocketTriggerBot.CPS)), (RocketTriggerBot.CPS - 1.0) / 14.0) {
             @Override protected void updateMessage() { setMessage(Text.literal("§7CPS: §f" + String.format("%.1f", 1.0 + value * 14.0))); }
@@ -83,31 +83,25 @@ public class TriggerBotScreen extends Screen {
                 }
         ).dimensions(cx - 105, y + 154, 210, 18).build());
 
-        // 9. Закрыть
+        // 9. Close
         this.addDrawableChild(ButtonWidget.builder(Text.literal("§c✕ Close"), b -> this.close()).dimensions(cx - 105, y + 180, 210, 18).build());
     }
 
     @Override
     public void render(DrawContext ctx, int mouseX, int mouseY, float delta) {
-        // Отрисовка градиента на весь экран (от черного к темно-серому)
         ctx.fillGradient(0, 0, this.width, this.height, 0xDD000000, 0xDD1A1A1A);
         
-        // Панель меню
         int panelWidth = 230;
         int panelHeight = 270;
         int panelX = (this.width - panelWidth) / 2;
         int panelY = (this.height - panelHeight) / 2 - 10;
 
-        // Градиентный фон панели
         ctx.fillGradient(panelX, panelY, panelX + panelWidth, panelY + panelHeight, 0xFF141414, 0xFF2A2A2A);
-        // Красная обводка
         ctx.drawBorder(panelX, panelY, panelWidth, panelHeight, 0xFFCC0000);
         
-        // Заголовок
         ctx.drawCenteredTextWithShadow(this.textRenderer, "§l§cDARK TRIGGER", this.width / 2, panelY + 15, 0xFFFFFF);
         ctx.drawCenteredTextWithShadow(this.textRenderer, "§8V2.0 GRADIENT", this.width / 2, panelY + 28, 0x888888);
         
-        // Декоративная линия
         ctx.fill(panelX + 20, panelY + 40, panelX + panelWidth - 20, panelY + 41, 0xFFCC0000);
 
         super.render(ctx, mouseX, mouseY, delta);

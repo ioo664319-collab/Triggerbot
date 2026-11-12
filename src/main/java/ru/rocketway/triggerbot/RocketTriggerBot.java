@@ -6,6 +6,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.hit.EntityHitResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.Random;
@@ -15,7 +16,7 @@ public class RocketTriggerBot implements ClientModInitializer {
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
     public static boolean ENABLED = false;
-    public static double RANGE = 5.0;
+    public static double RANGE = 3.0; // Радиус прицела (3 блока - стандарт в Майнкрафте)
     public static int DELAY_MS = 250;
     public static boolean IGNORE_MOBS = true;
     public static boolean SMART_CRITS = true;
@@ -35,32 +36,42 @@ public class RocketTriggerBot implements ClientModInitializer {
             long now = System.currentTimeMillis();
             int currentDelay = DELAY_MS;
             if (RANDOM_DELAY) {
-                currentDelay += random.nextInt(101) - 50; // Разброс -50... +50
+                currentDelay += random.nextInt(101) - 50;
             }
 
             if (now - lastAttack < currentDelay) return;
 
-            // Ищем цель в радиусе
-            Entity target = ru.rocketway.triggerbot.bot.TriggerBot.findTarget(client, RANGE, IGNORE_MOBS);
-            if (target == null) return;
+            // ПРОВЕРКА: Куда смотрит твой прицел прямо сейчас
+            if (client.crosshairTarget instanceof EntityHitResult hitResult) {
+                Entity target = hitResult.getEntity();
 
-            if (SMART_CRITS) {
-                // Бьем только если падаем (крит)
-                if (client.player.fallDistance > 0.0F && !client.player.isOnGround()) {
+                // Проверяем цель (жива ли, моб или игрок)
+                if (!(target instanceof LivingEntity living) || !living.isAlive()) return;
+                if (IGNORE_MOBS && target instanceof MobEntity) return;
+                if (target instanceof PlayerEntity p && (p.isCreative() || p.isSpectator())) return;
+
+                // Проверяем дистанцию от тебя до цели
+                if (client.player.distanceTo(target) > RANGE) return;
+
+                // ЛОГИКА КРИТОВ
+                if (SMART_CRITS) {
+                    // Бьем, если мы падаем (крит)
+                    if (client.player.fallDistance > 0.0F && !client.player.isOnGround()) {
+                        attack(client, target);
+                        lastAttack = now;
+                    }
+                } else {
+                    // Бьем без критов (просто прицелился - бот ударил)
                     attack(client, target);
                     lastAttack = now;
                 }
-            } else {
-                // Обычный удар
-                attack(client, target);
-                lastAttack = now;
             }
         });
     }
 
     private void attack(net.minecraft.client.MinecraftClient client, Entity target) {
         if (client.interactionManager != null) {
-            client.player.lookAt(net.minecraft.command.argument.EntityAnchorArgumentType.EntityAnchor.EYES, target.getPos());
+            // НИКАКОГО lookAt! Просто бьем ту цель, на которую смотришь.
             client.interactionManager.attackEntity(client.player, target);
             client.player.swingHand(net.minecraft.util.Hand.MAIN_HAND);
         }

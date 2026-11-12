@@ -16,10 +16,9 @@ public class RocketTriggerBot implements ClientModInitializer {
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
     public static boolean ENABLED = false;
-    public static double RANGE = 3.0; // Радиус прицела (3 блока - стандарт в Майнкрафте)
+    public static double RANGE = 3.0;
     public static int DELAY_MS = 250;
     public static boolean IGNORE_MOBS = true;
-    public static boolean SMART_CRITS = true;
     public static boolean RANDOM_DELAY = true;
 
     private long lastAttack = 0L;
@@ -41,37 +40,34 @@ public class RocketTriggerBot implements ClientModInitializer {
 
             if (now - lastAttack < currentDelay) return;
 
-            // ПРОВЕРКА: Куда смотрит твой прицел прямо сейчас
+            // Смотрим, на кого направлен прицел
             if (client.crosshairTarget instanceof EntityHitResult hitResult) {
                 Entity target = hitResult.getEntity();
 
-                // Проверяем цель (жива ли, моб или игрок)
                 if (!(target instanceof LivingEntity living) || !living.isAlive()) return;
                 if (IGNORE_MOBS && target instanceof MobEntity) return;
                 if (target instanceof PlayerEntity p && (p.isCreative() || p.isSpectator())) return;
-
-                // Проверяем дистанцию от тебя до цели
                 if (client.player.distanceTo(target) > RANGE) return;
 
-                // ЛОГИКА КРИТОВ
-                if (SMART_CRITS) {
-                    // Бьем, если мы падаем (крит)
-                    if (client.player.fallDistance > 0.0F && !client.player.isOnGround()) {
-                        attack(client, target);
-                        lastAttack = now;
-                    }
-                } else {
-                    // Бьем без критов (просто прицелился - бот ударил)
+                // ЛОГИКА УМНЫХ КРИТОВ (Гибрид)
+                // 1. Если мы падаем (крит) - бьем!
+                if (client.player.fallDistance > 0.0F && !client.player.isOnGround()) {
+                    attack(client, target);
+                    lastAttack = now;
+                } 
+                // 2. Если мы на земле и НЕ прыгаем - бьем обычным ударом!
+                else if (client.player.isOnGround() && !client.player.isJumping()) {
                     attack(client, target);
                     lastAttack = now;
                 }
+                // 3. Если мы только что прыгнули (летим вверх) - ЖДЕМ. Бот не бьет.
+                // Он дождется, пока мы начнем падать, и ударит в пункте 1.
             }
         });
     }
 
     private void attack(net.minecraft.client.MinecraftClient client, Entity target) {
         if (client.interactionManager != null) {
-            // НИКАКОГО lookAt! Просто бьем ту цель, на которую смотришь.
             client.interactionManager.attackEntity(client.player, target);
             client.player.swingHand(net.minecraft.util.Hand.MAIN_HAND);
         }

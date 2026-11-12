@@ -15,9 +15,9 @@ public class TriggerBotScreen extends Screen {
     @Override
     protected void init() {
         int cx = this.width / 2;
-        int y = this.height / 2 - 85; // Сдвинули чуть выше
+        int y = this.height / 2 - 85; 
 
-        // Вкл/Выкл Триггербота
+        // 1. Вкл/Выкл Триггербота
         this.addDrawableChild(ButtonWidget.builder(
                 Text.literal("TriggerBot: " + (RocketTriggerBot.ENABLED ? "§aON" : "§cOFF")),
                 b -> {
@@ -26,7 +26,7 @@ public class TriggerBotScreen extends Screen {
                 }
         ).dimensions(cx - 100, y, 200, 20).build());
 
-        // Вкл/Выкл Aim Assist
+        // 2. Вкл/Выкл Aim Assist
         this.addDrawableChild(ButtonWidget.builder(
                 Text.literal("Aim Assist: " + (RocketTriggerBot.AIM_ASSIST ? "§aON" : "§cOFF")),
                 b -> {
@@ -35,28 +35,28 @@ public class TriggerBotScreen extends Screen {
                 }
         ).dimensions(cx - 100, y + 25, 200, 20).build());
 
-        // Задержка удара
+        // 3. Задержка удара
         this.addDrawableChild(new SliderWidget(cx - 100, y + 50, 200, 20,
                 Text.literal("Delay: " + RocketTriggerBot.DELAY_MS + "ms"), (RocketTriggerBot.DELAY_MS - 50) / 450.0) {
             @Override protected void updateMessage() { setMessage(Text.literal("Delay: " + (int)(50 + value * 450) + "ms")); }
             @Override protected void applyValue() { RocketTriggerBot.DELAY_MS = (int)(50 + value * 450); }
         });
 
-        // Сила наведения (Aim Speed)
+        // 4. Сила наведения (Aim Speed)
         this.addDrawableChild(new SliderWidget(cx - 100, y + 75, 200, 20,
                 Text.literal("Aim Speed: " + String.format("%.1f", RocketTriggerBot.AIM_SPEED)), (RocketTriggerBot.AIM_SPEED - 0.1) / 9.9) {
             @Override protected void updateMessage() { setMessage(Text.literal("Aim Speed: " + String.format("%.1f", 0.1 + value * 9.9))); }
             @Override protected void applyValue() { RocketTriggerBot.AIM_SPEED = 0.1 + value * 9.9; }
         });
 
-        // Радиус
+        // 5. Радиус
         this.addDrawableChild(new SliderWidget(cx - 100, y + 100, 200, 20,
                 Text.literal("Range: " + RocketTriggerBot.RANGE + "m"), (RocketTriggerBot.RANGE - 1) / 9) {
             @Override protected void updateMessage() { setMessage(Text.literal("Range: " + String.format("%.1f", 1 + value * 9) + "m")); }
             @Override protected void applyValue() { RocketTriggerBot.RANGE = 1 + value * 9; }
         });
 
-        // Игнор мобов
+        // 6. Игнор мобов
         this.addDrawableChild(ButtonWidget.builder(
                 Text.literal("Ignore mobs: " + (RocketTriggerBot.IGNORE_MOBS ? "§aYES" : "§cNO")),
                 b -> {
@@ -65,7 +65,7 @@ public class TriggerBotScreen extends Screen {
                 }
         ).dimensions(cx - 100, y + 125, 200, 20).build());
 
-        // Рандом задержки
+        // 7. Рандом задержки
         this.addDrawableChild(ButtonWidget.builder(
                 Text.literal("Random Delay: " + (RocketTriggerBot.RANDOM_DELAY ? "§aON" : "§cOFF")),
                 b -> {
@@ -74,7 +74,7 @@ public class TriggerBotScreen extends Screen {
                 }
         ).dimensions(cx - 100, y + 150, 200, 20).build());
 
-        // Кнопка закрытия
+        // 8. Закрыть
         this.addDrawableChild(ButtonWidget.builder(Text.literal("§cClose Menu"), b -> this.close()).dimensions(cx - 100, y + 180, 200, 20).build());
     }
 

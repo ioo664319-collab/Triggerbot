@@ -6,14 +6,7 @@
   "description": "Trigger-bot GUI on K key",
   "authors": ["Rocket Way"],
   "license": "MIT",
+  "mixins": [
+    "rockettriggerbot.mixins.json"
+  ],
   "environment": "client",
-  "entrypoints": {
-    "client": ["ru.rocketway.triggerbot.RocketTriggerBot"]
-  },
-  "depends": {
-    "fabricloader": ">=0.16.0",
-    "fabric-api": "*",
-    "minecraft": "~1.21.4",
-    "java": ">=21"
-  }
-}

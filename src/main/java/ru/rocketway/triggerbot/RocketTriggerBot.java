@@ -30,12 +30,18 @@ public class RocketTriggerBot implements ClientModInitializer {
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (!ENABLED || client.player == null || client.world == null) return;
-            if (client.currentScreen != null) return;
+            if (client.currentScreen != null) return; // Не бить, когда открыт инвентарь
+
+            // НОВЫЕ ПРОВЕРКИ:
+            if (client.player.isUsingItem()) return; // Не бить, когда едим/пьем/блокируем
+            if (client.player.isSneaking()) return;  // Не бить, когда сидим (крадемся)
 
             long now = System.currentTimeMillis();
+            
+            // ИСПРАВЛЕННЫЙ РАНДОМ: разброс от -50 до +50 мс
             int currentDelay = DELAY_MS;
             if (RANDOM_DELAY) {
-                currentDelay += random.nextInt(101) - 50;
+                currentDelay += (random.nextInt(101) - 50); 
             }
 
             if (now - lastAttack < currentDelay) return;
@@ -48,17 +54,16 @@ public class RocketTriggerBot implements ClientModInitializer {
                 if (target instanceof PlayerEntity p && (p.isCreative() || p.isSpectator())) return;
                 if (client.player.distanceTo(target) > RANGE) return;
 
-                // Если мы падаем (крит) - бьем!
+                // Если падаем - бьем критом
                 if (client.player.fallDistance > 0.0F && !client.player.isOnGround()) {
                     attack(client, target);
                     lastAttack = now;
                 } 
-                // Если мы на земле - бьем обычным ударом!
+                // Если на земле - бьем обычным ударом
                 else if (client.player.isOnGround()) {
                     attack(client, target);
                     lastAttack = now;
                 }
-                // Если мы в прыжке (летим вверх) - бот ничего не делает, ждет падения.
             }
         });
     }

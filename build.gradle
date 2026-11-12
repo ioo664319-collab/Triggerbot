@@ -34,3 +34,9 @@ java {
 tasks.withType(JavaCompile).configureEach {
     it.options.release = 21
 }
+
+sourceSets {
+    main {
+        java { srcDirs = ['src/main/java'] }
+    }
+}

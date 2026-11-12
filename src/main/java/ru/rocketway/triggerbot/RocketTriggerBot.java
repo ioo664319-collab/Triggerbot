@@ -4,6 +4,10 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.entity.player.PlayerEntity;
 
 public class RocketTriggerBot implements ClientModInitializer {
     public static final String MOD_ID = "rockettriggerbot";
@@ -26,9 +30,19 @@ public class RocketTriggerBot implements ClientModInitializer {
             if (now - lastAttack < DELAY_MS) return;
             if (client.currentScreen != null) return;
 
-            var target = ru.rocketway.triggerbot.bot.TriggerBot.findTarget(client, RANGE, IGNORE_MOBS);
-            if (target != null) {
-                ru.rocketway.triggerbot.bot.TriggerBot.attack(client, target);
+            // Проверяем, на что наведен прицел (до 5 блоков)
+            Entity target = client.crosshairTarget instanceof net.minecraft.entity.Entity ? (Entity) client.crosshairTarget : null;
+            if (target == null) return; 
+
+            // Проверки цели (жива ли, не моб, если включен игнор)
+            if (!(target instanceof LivingEntity living) || !living.isAlive()) return;
+            if (IGNORE_MOBS && target instanceof MobEntity) return;
+            if (target instanceof PlayerEntity p && (p.isCreative() || p.isSpectator())) return;
+
+            // Бьем без поворота камеры
+            if (client.interactionManager != null) {
+                client.interactionManager.attackEntity(client.player, target);
+                client.player.swingHand(net.minecraft.util.Hand.MAIN_HAND);
                 lastAttack = now;
             }
         });

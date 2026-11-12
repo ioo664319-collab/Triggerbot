@@ -40,7 +40,6 @@ public class RocketTriggerBot implements ClientModInitializer {
 
             if (now - lastAttack < currentDelay) return;
 
-            // Смотрим, на кого направлен прицел
             if (client.crosshairTarget instanceof EntityHitResult hitResult) {
                 Entity target = hitResult.getEntity();
 
@@ -49,19 +48,17 @@ public class RocketTriggerBot implements ClientModInitializer {
                 if (target instanceof PlayerEntity p && (p.isCreative() || p.isSpectator())) return;
                 if (client.player.distanceTo(target) > RANGE) return;
 
-                // ЛОГИКА УМНЫХ КРИТОВ (Гибрид)
-                // 1. Если мы падаем (крит) - бьем!
+                // Если мы падаем (крит) - бьем!
                 if (client.player.fallDistance > 0.0F && !client.player.isOnGround()) {
                     attack(client, target);
                     lastAttack = now;
                 } 
-                // 2. Если мы на земле и НЕ прыгаем - бьем обычным ударом!
-                else if (client.player.isOnGround() && !client.player.isJumping()) {
+                // Если мы на земле - бьем обычным ударом!
+                else if (client.player.isOnGround()) {
                     attack(client, target);
                     lastAttack = now;
                 }
-                // 3. Если мы только что прыгнули (летим вверх) - ЖДЕМ. Бот не бьет.
-                // Он дождется, пока мы начнем падать, и ударит в пункте 1.
+                // Если мы в прыжке (летим вверх) - бот ничего не делает, ждет падения.
             }
         });
     }

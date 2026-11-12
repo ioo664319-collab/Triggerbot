@@ -7,6 +7,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.hit.EntityHitResult;
+import net.minecraft.util.math.MathHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.Random;
@@ -20,6 +21,10 @@ public class RocketTriggerBot implements ClientModInitializer {
     public static int DELAY_MS = 250;
     public static boolean IGNORE_MOBS = true;
     public static boolean RANDOM_DELAY = true;
+    
+    // Настройки AIM ASSIST
+    public static boolean AIM_ASSIST = false;
+    public static double AIM_SPEED = 2.0; // Сила наведения (от 0.1 до 10.0)
 
     private long lastAttack = 0L;
     private final Random random = new Random();
@@ -29,16 +34,45 @@ public class RocketTriggerBot implements ClientModInitializer {
         Keybinds.register();
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            if (!ENABLED || client.player == null || client.world == null) return;
-            if (client.currentScreen != null) return; // Не бить, когда открыт инвентарь
+            if (client.player == null || client.world == null) return;
+            if (client.currentScreen != null) return;
 
-            // НОВЫЕ ПРОВЕРКИ:
-            if (client.player.isUsingItem()) return; // Не бить, когда едим/пьем/блокируем
-            if (client.player.isSneaking()) return;  // Не бить, когда сидим (крадемся)
+            // ЛОГИКА AIM ASSIST (Плавное наведение)
+            if (AIM_ASSIST) {
+                Entity target = ru.rocketway.triggerbot.bot.TriggerBot.findTarget(client, RANGE, IGNORE_MOBS);
+                if (target != null) {
+                    // Вычисляем разницу между нашим прицелом и целью
+                    double diffX = target.getX() - client.player.getX();
+                    double diffY = (target.getY() + target.getHeight() / 2.0) - (client.player.getY() + client.player.getStandingEyeHeight());
+                    double diffZ = target.getZ() - client.player.getZ();
+                    double dist = MathHelper.sqrt((float)(diffX * diffX + diffZ * diffZ));
+
+                    // Вычисляем идеальные углы поворота (Yaw - влево/вправо, Pitch - вверх/вниз)
+                    float targetYaw = (float) (Math.toDegrees(Math.atan2(diffZ, diffX))) - 90.0F;
+                    float targetPitch = (float) (-Math.toDegrees(Math.atan2(diffY, dist)));
+
+                    // Плавно двигаем камеру к цели (магия AIM_SPEED)
+                    float speed = (float) (AIM_SPEED * 0.1);
+                    float currentYaw = client.player.getYaw();
+                    float currentPitch = client.player.getPitch();
+
+                    // Вычисляем разницу в градусах
+                    float deltaYaw = MathHelper.wrapDegrees(targetYaw - currentYaw);
+                    float deltaPitch = MathHelper.wrapDegrees(targetPitch - currentPitch);
+
+                    // Если прицел уже наведен (разница меньше 1 градуса), не дергаем камеру
+                    if (Math.abs(deltaYaw) > 1.0F || Math.abs(deltaPitch) > 1.0F) {
+                        client.player.setYaw(currentYaw + deltaYaw * speed);
+                        client.player.setPitch(currentPitch + deltaPitch * speed);
+                    }
+                }
+            }
+
+            // ЛОГИКА ТРИГГЕРБОТА (Удары)
+            if (!ENABLED) return;
+            if (client.player.isUsingItem() || client.player.isSneaking()) return;
 
             long now = System.currentTimeMillis();
-            
-            // ИСПРАВЛЕННЫЙ РАНДОМ: разброс от -50 до +50 мс
             int currentDelay = DELAY_MS;
             if (RANDOM_DELAY) {
                 currentDelay += (random.nextInt(101) - 50); 
@@ -54,12 +88,10 @@ public class RocketTriggerBot implements ClientModInitializer {
                 if (target instanceof PlayerEntity p && (p.isCreative() || p.isSpectator())) return;
                 if (client.player.distanceTo(target) > RANGE) return;
 
-                // Если падаем - бьем критом
                 if (client.player.fallDistance > 0.0F && !client.player.isOnGround()) {
                     attack(client, target);
                     lastAttack = now;
                 } 
-                // Если на земле - бьем обычным ударом
                 else if (client.player.isOnGround()) {
                     attack(client, target);
                     lastAttack = now;
@@ -74,4 +106,4 @@ public class RocketTriggerBot implements ClientModInitializer {
             client.player.swingHand(net.minecraft.util.Hand.MAIN_HAND);
         }
     }
-}
+                    }

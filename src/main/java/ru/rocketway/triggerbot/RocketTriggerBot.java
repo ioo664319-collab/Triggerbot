@@ -17,10 +17,10 @@ public class RocketTriggerBot implements ClientModInitializer {
 
     public static boolean ENABLED = false;
     public static double RANGE = 3.0;
-    public static double CPS = 8.0; // Клики в секунду (по умолчанию 8)
+    public static double CPS = 8.0;
     public static boolean IGNORE_MOBS = true;
-    public static boolean AUTO_REFILL = false; // Не бить, если 0 XP
-    public static boolean ANTI_AFK = false; // Двигать головой
+    public static boolean AUTO_REFILL = false; 
+    public static boolean ANTI_AFK = false; 
 
     public static boolean AIM_ASSIST = false;
     public static double AIM_SPEED = 2.0;
@@ -37,32 +37,27 @@ public class RocketTriggerBot implements ClientModInitializer {
             if (client.player == null || client.world == null) return;
             if (client.currentScreen != null) return;
 
-            // --- ANTI-AFK (Двигаем головой, чтобы не кикнуло) ---
+            // Anti-AFK
             if (ANTI_AFK) {
                 afkTimer += 1.0f;
-                if (afkTimer > 100) { // Каждые 5 секунд
+                if (afkTimer > 100) { 
                     client.player.setYaw(client.player.getYaw() + (random.nextFloat() * 4 - 2));
                     afkTimer = 0;
                 }
             }
 
-            // --- ТРИГГЕРБОТ ---
+            // Триггербот
             if (!ENABLED) return;
             if (client.player.isUsingItem() || client.player.isSneaking()) return;
-
-            // Auto-Refill: не бить, если 0 XP уровней (чтобы не тратить зачарования)
             if (AUTO_REFILL && client.player.experienceLevel <= 0) return;
 
             long now = System.currentTimeMillis();
-            
-            // Вычисляем задержку в мс на основе CPS (1000 / CPS)
             double baseDelay = 1000.0 / CPS;
-            // Добавляем плавное колебание (синусоида + рандом)
-            double wave = Math.sin(now / 200.0) * 20.0; // Плавные волны
-            double randomOffset = (random.nextDouble() * 30.0) - 15.0; // Небольшой шум
+            double wave = Math.sin(now / 200.0) * 20.0; 
+            double randomOffset = (random.nextDouble() * 30.0) - 15.0; 
             
             long currentDelay = (long) (baseDelay + wave + randomOffset);
-            if (currentDelay < 30) currentDelay = 30; // Защита от слишком быстрых кликов
+            if (currentDelay < 30) currentDelay = 30;
 
             if (now - lastAttack < currentDelay) return;
 
